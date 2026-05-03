@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Centro de Apps Interactivas</title>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:radial-gradient(circle,#0f172a,#020617);
+  color:white;
+  overflow-x:hidden;
+}
+
+header{
+  text-align:center;
+  padding:15px;
+  background:#111827;
+}
+
+.hub{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:15px;
+  padding:30px;
+}
+
+.app{
+  background:#1e293b;
+  padding:20px;
+  border-radius:15px;
+  cursor:pointer;
+  transition:0.3s;
+  text-align:center;
+}
+
+.app:hover{
+  transform:scale(1.08);
+  box-shadow:0 0 15px #38bdf8;
+}
+
+.screen{
+  display:none;
+  padding:20px;
+  text-align:center;
+}
+
+button{
+  padding:10px;
+  margin:5px;
+  cursor:pointer;
+}
+
+.grid{
+  display:grid;
+  justify-content:center;
+  gap:5px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>🌞 Centro de Apps Interactivas</h1>
+  <p id="user"></p>
+</header>
+
+<!-- HUB -->
+<div id="hub" class="hub">
+  <div class="app" onclick="openApp('sopa')">🐾 Sopa de Letras</div>
+  <div class="app" onclick="openApp('quiz')">🧠 Cuestionario</div>
+  <div class="app" onclick="openApp('memoria')">🎮 Memoria</div>
+  <div class="app" onclick="openApp('puzzle')">🧩 Rompecabezas</div>
+</div>
+
+<!-- SOPA -->
+<div id="sopa" class="screen">
+<h2>Sopa de Letras</h2>
+
+<div id="gridSopa" class="grid" style="grid-template-columns:repeat(5,60px);"></div>
+
+<p>Palabra: <span id="current"></span></p>
+<button onclick="validarSopa()">Validar</button>
+<button onclick="back()">Volver</button>
+</div>
+
+<!-- QUIZ -->
+<div id="quiz" class="screen">
+<h2>Cuestionario</h2>
+<p id="pregunta"></p>
+<div id="opciones"></div>
+<p id="score"></p>
+<button onclick="back()">Volver</button>
+</div>
+
+<!-- MEMORIA -->
+<div id="memoria" class="screen">
+<h2>Memoria</h2>
+<div id="gridMemoria" class="grid" style="grid-template-columns:repeat(4,70px);"></div>
+<button onclick="resetMemoria()">Reiniciar</button>
+<button onclick="back()">Volver</button>
+</div>
+
+<!-- PUZZLE -->
+<div id="puzzle" class="screen">
+<h2>Puzzle</h2>
+<div id="board" class="grid" style="grid-template-columns:repeat(3,70px);"></div>
+<div id="pieces"></div>
+<button onclick="resetPuzzle()">Reiniciar</button>
+<button onclick="back()">Volver</button>
+</div>
+
+<script>
+// COOKIE USER
+function setCookie(n,v,d){let x=new Date();x.setTime(x.getTime()+d*86400000);document.cookie=n+"="+v+";expires="+x.toUTCString()+";path=/";}
+function getCookie(n){return document.cookie.split('; ').find(r=>r.startsWith(n+'='))?.split('=')[1];}
+
+let user=getCookie("user");
+if(!user){user=prompt("Tu nombre:");setCookie("user",user,7);}
+document.getElementById("user").innerText="Bienvenido " + user;
+
+// NAV
+function openApp(id){document.getElementById("hub").style.display="none";document.getElementById(id).style.display="block";}
+function back(){document.querySelectorAll(".screen").forEach(s=>s.style.display="none");document.getElementById("hub").style.display="grid";}
+
+// SWEET ALERT
+function ok(t){Swal.fire({title:t,icon:"success",timer:1000,showConfirmButton:false});}
+function bad(t){Swal.fire({title:t,icon:"error",timer:1000,showConfirmButton:false});}
+
+// QUIZ
+let q=[
+{q:"Capital de México?",o:["CDMX","Monterrey","Guadalajara"],c:0},
+{q:"Año inicio WWII?",o:["1914","1939","1945"],c:1}
+];
+let qi=0,sc=0;
+function loadQ(){document.getElementById("pregunta").innerText=q[qi].q;
+document.getElementById("opciones").innerHTML="";
+q[qi].o.forEach((x,i)=>{let b=document.createElement("button");b.innerText=x;b.onclick=()=>ans(i);document.getElementById("opciones").appendChild(b);});}
+function ans(i){if(i==q[qi].c){sc++;ok("Correcto");}else bad("Incorrecto");qi++;if(qi<q.length)loadQ();else document.getElementById("score").innerText="Score: "+sc;}
+loadQ();
+
+// MEMORIA
+let em=["🐶","🐱","🐶","🐱"].sort(()=>0.5-Math.random());
+let sel=[];
+function mem(){let g=document.getElementById("gridMemoria");g.innerHTML="";
+em.forEach(e=>{let d=document.createElement("div");d.style.background="#1e293b";d.style.height="70px";d.style.display="flex";d.style.alignItems="center";d.style.justifyContent="center";d.innerHTML="";d.onclick=()=>{
+d.innerHTML=e;sel.push(d);if(sel.length==2){if(sel[0].innerHTML==sel[1].innerHTML){ok("Par!");sel=[];}else setTimeout(()=>{sel[0].innerHTML="";sel[1].innerHTML="";sel=[];},500);}};g.appendChild(d);});}
+function resetMemoria(){mem();}
+mem();
+
+// SOPA
+let letras=["G","A","T","O","X","P","E","R","R","O","X","X","X","X","X"];
+let word="";
+function sopa(){let g=document.getElementById("gridSopa");g.innerHTML="";
+letras.forEach(l=>{let d=document.createElement("div");d.style.background="#1e293b";d.style.height="60px";d.innerHTML=l;d.onclick=()=>{word+=l;document.getElementById("current").innerText=word;};g.appendChild(d);});}
+function validarSopa(){if(["GATO","PERRO"].includes(word)){ok("Correcto");}else bad("No");word="";document.getElementById("current").innerText="";}
+sopa();
+
+// PUZZLE
+let correct=[1,2,3,4,5,6,7,8,9];
+let placed=[];
+function puzzle(){let b=document.getElementById("board");let p=document.getElementById("pieces");b.innerHTML="";p.innerHTML="";
+for(let i=0;i<9;i++){let c=document.createElement("div");c.style.background="#1e293b";c.style.height="70px";c.ondragover=e=>e.preventDefault();c.ondrop=e=>{let v=e.dataTransfer.getData("t");c.innerText=v;placed[i]=v;if(placed.join()==correct.join())ok("Completado");};b.appendChild(c);}correct.sort(()=>0.5-Math.random()).forEach(n=>{let d=document.createElement("div");d.draggable=true;d.innerText=n;d.style.background="#334155";d.style.margin="5px";d.ondragstart=e=>e.dataTransfer.setData("t",n);p.appendChild(d);});}
+function resetPuzzle(){placed=[];puzzle();}
+puzzle();
+</script>
+
+</body>
+</html>
