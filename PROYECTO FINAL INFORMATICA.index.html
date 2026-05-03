@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Centro de Apps Interactivas</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #0f172a;
+      color: #e2e8f0;
+      text-align: center;
+    }
+    header {
+      padding: 20px;
+      background: #1e293b;
+    }
+    h1 {
+      margin: 0;
+    }
+    .hub {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      padding: 40px;
+    }
+    .app {
+      background: #1e40af;
+      padding: 20px;
+      border-radius: 15px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .app:hover {
+      transform: scale(1.05);
+      background: #2563eb;
+    }
+    .screen {
+      display: none;
+      padding: 20px;
+    }
+    button {
+      padding: 10px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🌐 Centro de Apps Interactivas</h1>
+  <p>Proyecto escolar con almacenamiento y juegos</p>
+</header>
+
+<!-- HUB PRINCIPAL -->
+<div id="hub" class="hub">
+  <div class="app" onclick="openApp('sopa')">Sopa de Letras (Animales)</div>
+  <div class="app" onclick="openApp('crucigrama')">Crucigrama (Tecnología)</div>
+  <div class="app" onclick="openApp('quiz')">Cuestionario (Historia)</div>
+  <div class="app" onclick="openApp('juego')">Juego Antiguo (Memoria)</div>
+  <div class="app" onclick="openApp('rompecabezas')">Rompecabezas</div>
+</div>
+
+<!-- SOPA DE LETRAS SIMPLE -->
+<div id="sopa" class="screen">
+  <h2>Sopa de Letras</h2>
+  <p>Palabras guardadas con localStorage</p>
+  <input id="word" placeholder="Escribe una palabra animal" />
+  <button onclick="addWord()">Guardar</button>
+  <ul id="wordList"></ul>
+  <button onclick="back()">Volver</button>
+</div>
+
+<!-- QUIZ -->
+<div id="quiz" class="screen">
+  <h2>Cuestionario de Historia</h2>
+  <p>¿Quién descubrió América?</p>
+  <button onclick="check(true)">Cristóbal Colón</button>
+  <button onclick="check(false)">Napoleón</button>
+  <button onclick="back()">Volver</button>
+</div>
+
+<!-- ROMPECABEZAS SIMPLE -->
+<div id="rompecabezas" class="screen">
+  <h2>Rompecabezas (Drag simple)</h2>
+  <p>Arrastra el cuadro</p>
+  <div draggable="true" ondragstart="drag(event)" id="box" style="width:100px;height:100px;background:red;"></div>
+  <button onclick="back()">Volver</button>
+</div>
+
+<script>
+function openApp(id){
+  document.getElementById('hub').style.display='none';
+  document.getElementById(id).style.display='block';
+}
+
+function back(){
+  document.querySelectorAll('.screen').forEach(s=>s.style.display='none');
+  document.getElementById('hub').style.display='grid';
+}
+
+// LOCAL STORAGE SOPA
+function addWord(){
+  let word=document.getElementById('word').value;
+  let list=JSON.parse(localStorage.getItem('words')||'[]');
+  list.push(word);
+  localStorage.setItem('words',JSON.stringify(list));
+  render();
+}
+
+function render(){
+  let list=JSON.parse(localStorage.getItem('words')||'[]');
+  document.getElementById('wordList').innerHTML=list.map(w=>`<li>${w}</li>`).join('');
+}
+render();
+
+// QUIZ ALERT
+function check(correct){
+  alert(correct ? "¡Correcto!" : "Incorrecto");
+}
+
+// DRAG
+function drag(ev){
+  ev.dataTransfer.setData("text", ev.target.id);
+}
+</script>
+
+</body>
+</html>
